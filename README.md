@@ -1,31 +1,40 @@
 # grill-with-team
 
-A [Claude Code](https://code.claude.com) skill that runs a design "grilling" session in a Slack thread, so the whole team can take part.
+An [Agent Skill](https://agentskills.io) for [Claude Code](https://code.claude.com) and [Codex](https://developers.openai.com/codex) that runs a design "grilling" session in a Slack thread, so the whole team can take part.
 
-Claude works through your plan as a tree of decisions, asking numbered questions in rounds, each with a recommended answer. As terms and decisions settle, it writes them to `GLOSSARY.md` and ADRs in your repo. With `grill-with-team`, the session happens in the open: you (the **facilitator**) stay in charge and answer by default, while **stakeholders** such as a product owner or engineering manager are tagged on the questions they're best placed to answer, and anyone else in the channel can chip in.
+The agent works through your plan as a tree of decisions, asking numbered questions in rounds, each with a recommended answer. As terms and decisions settle, it writes them to `GLOSSARY.md` and ADRs in your repo. With `grill-with-team`, the session happens in the open: you (the **facilitator**) stay in charge and answer by default, while **stakeholders** such as a product owner or engineering manager are tagged on the questions they're best placed to answer, and anyone else in the channel can chip in.
 
 It builds on Matt Pocock's [`grilling`](https://github.com/mattpocock/skills) and [`domain-modeling`](https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling) skills.
 
 ## Requirements
 
-- **Claude Code.**
-- **A Slack connector** that can send messages (including thread replies) and read threads. The skill was built and tested with the Claude Slack connector. Messages post under your own Slack account, and Slack adds a "Sent using Claude" footer — the skill uses that footer to tell its own posts apart from your answers, so a connector that doesn't add it won't work as-is.
-- **[mattpocock/skills](https://github.com/mattpocock/skills)** installed, for `/grilling` and `/domain-modeling`. You need a version of `domain-modeling` that writes `GLOSSARY.md` (commit `d80fa0f` or later).
+- **Claude Code or Codex** (or another agent that loads Agent Skills).
+- **Slack tools** that can send messages (including thread replies) and read threads: the Claude Slack connector in Claude Code, or a Slack MCP server in Codex. The skill was built and tested with the Claude Slack connector, which posts under your own Slack account. The skill keeps a session log of every message it posts (in `.grill-with-team/` in your repo; you may want to gitignore it), so it can tell its posts apart from your answers with any Slack tool.
+- **[mattpocock/skills](https://github.com/mattpocock/skills)** installed in the same agent, for `grilling` and `domain-modeling`. You need a version of `domain-modeling` that writes `GLOSSARY.md` (commit `d80fa0f` or later).
 
 ## Install
 
-Copy `skills/grill-with-team/` into your project's `.claude/skills/` (or `~/.claude/skills/` to use it everywhere).
+Copy `skills/grill-with-team/` into your agent's skills folder:
+
+| Agent | Project | Everywhere |
+|---|---|---|
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| Codex | `.agents/skills/` | `~/.agents/skills/` |
+
+Both agents only run the skill when you invoke it: Claude Code through `disable-model-invocation` in `SKILL.md`, Codex through `agents/openai.yaml`.
 
 ## Usage
 
+Commands are shown in Claude Code form. In Codex, use `$grill-with-team` in place of `/grill-with-team`.
+
 | Command | What it does |
 |---|---|
-| `/grill-with-team <topic>` | Start a session. Claude asks for the Slack channel and the stakeholders (name and role), then posts the session thread and the first round. |
+| `/grill-with-team <topic>` | Start a session. The agent asks for the Slack channel and the stakeholders (name and role), then posts the session thread and the first round. |
 | `/grill-with-team collect` | Read new replies, settle answers, post the next round and a status update. |
-| `/grill-with-team resume <thread link>` | Pick up a session in a fresh Claude Code session, rebuilt from the thread. |
+| `/grill-with-team resume <thread link>` | Pick up a session in a fresh agent session, rebuilt from the thread. If the session log isn't on this machine, the agent asks you to confirm which 🤖 posts were its own. |
 | `/grill-with-team lock in` | End the session and post a summary of decisions, glossary terms and ADRs. |
 
-You can also answer questions directly in Claude Code at any time; Claude posts your answer to the thread. Nothing happens between collects, so either run `collect` yourself or set up a `/loop` (Claude offers one at kickoff).
+You can also answer questions directly in your agent session at any time; the agent posts your answer to the thread. Nothing happens between collects, so either run `collect` yourself or, in Claude Code, set up a `/loop` (offered at kickoff). In agents without a scheduled-repeat command, run `collect` yourself. Agents with persistent memory (like Claude Code) remember your channel and stakeholders between sessions; otherwise you enter them each time.
 
 ### How answers settle
 
@@ -37,7 +46,7 @@ You can also answer questions directly in Claude Code at any time; Claude posts 
 
 ### Security
 
-Anyone in the channel can post in the thread, and Claude acts under the facilitator's Slack account and Claude Code session. The skill therefore treats every thread reply as a candidate answer, never as an instruction: requests aimed at Claude are reported to the facilitator in Claude Code and refused in the thread. Run it in channels where you're comfortable with the members seeing the session.
+Anyone in the channel can post in the thread, and the agent acts under the facilitator's Slack tools and agent session. The skill therefore treats every thread reply as a candidate answer, never as an instruction: requests aimed at the agent are reported to the facilitator in their session and refused in the thread. Run it in channels where you're comfortable with the members seeing the session.
 
 ## Status
 
