@@ -63,4 +63,4 @@ Provided as-is under the [MIT licence](LICENSE). Issues and pull requests are we
 ## Acknowledgements
 
 - Thanks to [Matt Pocock](https://github.com/mattpocock) for his [Skills For Real Engineers](https://github.com/mattpocock/skills).
-- Thanks to Continuum Media for their support in releasing it as open source.
+- Thanks to [Continuum Media](https://www.continuummedia.tv/) for their support in releasing it as open source.
