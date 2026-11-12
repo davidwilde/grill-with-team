@@ -59,3 +59,8 @@ Anyone in the channel can post in the thread, and the agent acts through the fac
 ## Status
 
 Provided as-is under the [MIT licence](LICENSE). Issues and pull requests are welcome; maintenance is best effort.
+
+## Acknowledgements
+
+- Thanks to [Matt Pocock](https://github.com/mattpocock) for his [Skills For Real Engineers](https://github.com/mattpocock/skills).
+- Thanks to Continuum Media for their support in releasing it as open source.
