@@ -48,20 +48,20 @@ Posted at the end of every collect. It is the session's source of truth — resu
 
 ```
 🤖 **Status after collect <n>**
-Stakeholders: {@ID} (<role>), …
+Stakeholders: <name> (<role>, `<ID>`), …
 
 | Q | Title | Owner | State | Answer |
 |---|---|---|---|---|
 | Q1 | … | facilitator | confirmed | … |
-| Q4 | … | {@ID} | provisionally settled | … |
-| Q6 | … | {@ID} | open (asked <date>) | |
+| Q4 | … | <name> | provisionally settled | … |
+| Q6 | … | <name> | open (asked <date>) | |
 | Q9 | … | facilitator | conflict: Q4 | |
 
 Matched by context: <reply summary> → Q<k>, …
 Unmatched: <n> replies, raised with the facilitator
 ```
 
-The `Unmatched` line gives a count only. Never quote or paraphrase an unmatched reply in the thread.
+The status post names people without mentioning them, so it notifies nobody: plain names in the Owner column, and each stakeholder's platform ID as inline code on the `Stakeholders` line, which resume needs. The `Unmatched` line gives a count only. Never quote or paraphrase an unmatched reply in the thread.
 
 ## Instruction refused
 
