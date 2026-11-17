@@ -1,0 +1,12 @@
+#!/bin/sh
+# Checks what is staged for commit, not the working copy.
+# Enable once per clone with: git config core.hooksPath .githooks
+set -eu
+
+git diff --cached --check
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+git checkout-index --all --prefix="$tmp/"
+
+node "$tmp/scripts/check.js" "$tmp"

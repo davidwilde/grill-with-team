@@ -1,0 +1,36 @@
+{
+  "name": "grill-with-team",
+  "version": "0.1.0",
+  "description": "An Agent Skill for Claude Code and Codex that runs a design grilling session in a Slack, Discord or Microsoft Teams thread.",
+  "keywords": [
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "skill",
+    "slack",
+    "discord",
+    "teams",
+    "adr",
+    "design"
+  ],
+  "homepage": "https://github.com/davidwilde/grill-with-team#readme",
+  "bugs": {
+    "url": "https://github.com/davidwilde/grill-with-team/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidwilde/grill-with-team.git"
+  },
+  "license": "MIT",
+  "author": "David Wilde",
+  "bin": {
+    "grill-with-team": "bin/install.js"
+  },
+  "files": [
+    "bin/",
+    "skills/"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

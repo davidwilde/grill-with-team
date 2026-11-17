@@ -22,7 +22,17 @@ It builds on Matt Pocock's [`grilling`](https://github.com/mattpocock/skills) an
 
 ## Install
 
-Copy `skills/grill-with-team/` into your agent's skills folder:
+With Node.js 18 or later:
+
+```sh
+npx grill-with-team                  # Claude Code, for all your projects
+npx grill-with-team --project        # Claude Code, this project only
+npx grill-with-team --agent codex    # Codex (add --project for this project only)
+```
+
+Add `--force` to replace an existing install, for example when updating.
+
+Or copy `skills/grill-with-team/` into your agent's skills folder yourself:
 
 | Agent | Project | Everywhere |
 |---|---|---|
@@ -59,6 +69,16 @@ Anyone in the channel can post in the thread, and the agent acts through the fac
 ## Status
 
 Provided as-is under the [MIT licence](LICENSE). Issues and pull requests are welcome; maintenance is best effort.
+
+### Contributing
+
+Turn on the pre-commit hook once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+It checks what you've staged in under a second: whitespace and conflict markers, the `SKILL.md` frontmatter, relative links in the Markdown files, and the installer. You can run the same checks with `node scripts/check.js`. CI runs them too, along with a [SkillSpector](https://github.com/NVIDIA/SkillSpector) security scan of the skill.
 
 ## Acknowledgements
 

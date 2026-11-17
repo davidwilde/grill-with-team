@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # NVIDIA/SkillSpector v2.13.4 (2026-11-04). Bump to a newer release once it
+  # is at least 7 days old, using the commit SHA rather than the tag.
+  SKILLSPECTOR_REF: 54824463814a0be01360792523ec7245a69190fc
+  SKILL_DIR: skills/grill-with-team
+
+jobs:
+  skillspector:
+    name: SkillSpector security scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Check out this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check out SkillSpector
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: NVIDIA/SkillSpector
+          ref: ${{ env.SKILLSPECTOR_REF }}
+          path: _tools/skillspector
+          persist-credentials: false
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          cache-dependency-glob: _tools/skillspector/uv.lock
+
+      # Installs exactly the versions in SkillSpector's own lockfile.
+      - name: Set up SkillSpector
+        working-directory: _tools/skillspector
+        run: uv sync --frozen --no-dev --python 3.13
+
+      # Static analysis only: no LLM, so no API keys and repeatable results.
+      - name: Scan (SARIF)
+        id: sarif
+        continue-on-error: true
+        run: >
+          _tools/skillspector/.venv/bin/skillspector scan "$SKILL_DIR"
+          --no-llm --fail-on-findings
+          --format sarif --output skillspector.sarif
+
+      - name: Upload results to code scanning
+        if: always() && hashFiles('skillspector.sarif') != ''
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: skillspector.sarif
+          category: skillspector
+
+      # Repeats the scan with readable output, and fails the job on any finding.
+      - name: Scan
+        run: >
+          _tools/skillspector/.venv/bin/skillspector scan "$SKILL_DIR"
+          --no-llm --fail-on-findings
+
+  package:
+    name: npm package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Check package contents
+        run: |
+          npm pack --dry-run --json > pack.json
+          node -e '
+            const files = require("./pack.json")[0].files.map(f => f.path);
+            const required = [
+              "bin/install.js",
+              "skills/grill-with-team/SKILL.md",
+              "skills/grill-with-team/POSTS.md",
+              "skills/grill-with-team/agents/openai.yaml",
+              "skills/grill-with-team/platforms/slack.md",
+              "skills/grill-with-team/platforms/discord.md",
+              "skills/grill-with-team/platforms/teams.md",
+              "README.md",
+              "LICENSE",
+            ];
+            const missing = required.filter(f => !files.includes(f));
+            if (missing.length) {
+              console.error("Missing from package:", missing.join(", "));
+              process.exit(1);
+            }
+            console.log(files.join("\n"));
+          '
+
+      # Same checks as the pre-commit hook: frontmatter, links, installer.
+      - name: Repo checks
+        run: node scripts/check.js
+
+      # A warning, not a failure, so docs-only changes after a release still pass.
+      - name: Check version is unpublished
+        run: |
+          name="$(node -p 'require("./package.json").name')"
+          version="$(node -p 'require("./package.json").version')"
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "::warning file=package.json::$name@$version is already on npm. Bump the version before publishing."
+          else
+            echo "$name@$version is not yet published."
+          fi
