@@ -1,6 +1,6 @@
 ---
 name: grill-with-team
-description: A grill-with-docs session run in a chat thread (Slack, Discord or Microsoft Teams), so stakeholders can answer the questions they're best placed for. Use only when the user explicitly invokes grill-with-team.
+description: "Run a design grilling session in a Slack, Discord or Microsoft Teams thread: numbered questions with recommended answers, stakeholders tagged on the ones in their area, and the glossary and ADRs written to the repo as decisions settle. Use only when the user explicitly invokes grill-with-team."
 disable-model-invocation: true
 ---
 
